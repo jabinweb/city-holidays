@@ -3,5 +3,7 @@
   "/enquiry/page": "app/enquiry/page.js",
   "/contact/page": "app/contact/page.js",
   "/booking/page": "app/booking/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/packages/page": "app/packages/page.js",
+  "/packages/[id]/page": "app/packages/[id]/page.js"
 }
