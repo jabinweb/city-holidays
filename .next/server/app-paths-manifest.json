@@ -1,9 +1,9 @@
 {
-  "/services/page": "app/services/page.js",
-  "/enquiry/page": "app/enquiry/page.js",
-  "/contact/page": "app/contact/page.js",
+  "/not-found": "app/not-found.js",
   "/booking/page": "app/booking/page.js",
+  "/contact/page": "app/contact/page.js",
+  "/enquiry/page": "app/enquiry/page.js",
   "/page": "app/page.js",
   "/packages/page": "app/packages/page.js",
-  "/packages/[id]/page": "app/packages/[id]/page.js"
+  "/services/taxi/page": "app/services/taxi/page.js"
 }

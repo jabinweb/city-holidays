@@ -7,6 +7,26 @@ const nextConfig = {
         hostname: 'images.pexels.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'az-ci-afde-prd-arena-01-e7fmh3dxacbgeyh5.z01.azurefd.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.vanrentalchennai.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'global.toyota',
+        pathname: '/**',
+      },
     ],
   },
 };

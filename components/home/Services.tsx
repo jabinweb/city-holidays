@@ -9,8 +9,9 @@ const ServiceCard: React.FC<{
   title: string;
   description: string;
   icon: React.ReactNode;
+  link: string;
   imageUrl: string;
-}> = ({ title, description, icon, imageUrl }) => {
+}> = ({ title, description, icon, link, imageUrl }) => {
   return (
     <Card hoverable className="h-full">
       <CardImage 
@@ -28,8 +29,8 @@ const ServiceCard: React.FC<{
         <CardDescription>{description}</CardDescription>
       </CardContent>
       <CardFooter className="flex justify-between items-center border-t">
-        <Link href="/services" className="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-          Learn more
+        <Link href={link} className="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+          Learn More
           <ArrowRight size={16} className="ml-1" />
         </Link>
         <Link href="/booking">
@@ -46,30 +47,35 @@ const Services: React.FC = () => {
       title: 'Holiday Packages',
       description: 'Customized holiday packages for families, couples, and solo travelers to destinations across India and abroad.',
       icon: <Package size={24} />,
+      link: '/services',
       imageUrl: 'https://images.pexels.com/photos/3935702/pexels-photo-3935702.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
     },
     {
       title: 'Flight Bookings',
       description: 'Domestic and international flight bookings at competitive prices with special deals and discounts.',
       icon: <Plane size={24} />,
+      link: '/services',
       imageUrl: 'https://images.pexels.com/photos/358319/pexels-photo-358319.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
     },
     {
       title: 'Railway Reservations',
       description: 'Hassle-free railway ticket bookings for all classes across Indian Railways network.',
       icon: <Train size={24} />,
+      link: '/services',
       imageUrl: 'https://images.unsplash.com/photo-1442570468985-f63ed5de9086?q=80&w=2720&auto=format&fit=crop'
     },
     {
       title: 'Bus Bookings',
       description: 'Book bus tickets for various operators covering routes across all major cities and tourist destinations.',
       icon: <Bus size={24} />,
+      link: '/services',
       imageUrl: 'https://images.unsplash.com/photo-1525962898597-a4ae6402826e?q=80&w=2669&auto=format&fit=crop'
     },
     {
       title: 'Taxi Services',
       description: 'Reliable taxi services for local sightseeing, airport transfers, and outstation travel.',
       icon: <Car size={24} />,
+      link: '/services/taxi',
       imageUrl: 'https://images.unsplash.com/photo-1628947733273-cdae71c9bfd3?q=80&w=2670&auto=format&fit=crop'
     }
   ];
@@ -94,6 +100,7 @@ const Services: React.FC = () => {
               title={service.title}
               description={service.description}
               icon={service.icon}
+              link={service.link}
               imageUrl={service.imageUrl}
             />
           ))}
@@ -106,6 +113,7 @@ const Services: React.FC = () => {
               title={service.title}
               description={service.description}
               icon={service.icon}
+              link={service.link}
               imageUrl={service.imageUrl}
             />
           ))}

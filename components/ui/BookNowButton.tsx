@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from './Button';
 import { X } from 'lucide-react';
 
@@ -8,6 +8,12 @@ interface BookNowButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
+  serviceData?: {
+    type: string;
+    name: string;
+    id: string;
+    price: number;
+  };
 }
 
 const services = [
@@ -22,11 +28,18 @@ const services = [
 export default function BookNowButton({ 
   variant = 'primary', 
   size = 'md',
-  fullWidth 
+  fullWidth,
+  serviceData
 }: BookNowButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState('');
+
+  useEffect(() => {
+    if (serviceData) {
+      setSelectedService(serviceData.type);
+    }
+  }, [serviceData]);
 
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
@@ -38,6 +51,45 @@ export default function BookNowButton({
     setStep(1);
     setSelectedService('');
   };
+
+  const renderTaxiForm = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Location</label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter pickup address"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Drop Location</label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter drop address"
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+          <input
+            type="time"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -66,16 +118,28 @@ export default function BookNowButton({
             <div className="p-6">
               {step === 1 ? (
                 <div className="grid grid-cols-2 gap-4">
-                  {services.map((service) => (
-                    <button
-                      key={service.id}
-                      onClick={() => handleServiceSelect(service.id)}
-                      className="flex flex-col items-center p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    >
-                      <span className="text-3xl mb-2">{service.icon}</span>
-                      <span className="text-sm font-medium text-gray-900">{service.name}</span>
-                    </button>
-                  ))}
+                  {!serviceData ? (
+                    // Show service selection only if serviceData is not provided
+                    services.map((service) => (
+                      <button
+                        key={service.id}
+                        onClick={() => handleServiceSelect(service.id)}
+                        className="flex flex-col items-center p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                      >
+                        <span className="text-3xl mb-2">{service.icon}</span>
+                        <span className="text-sm font-medium text-gray-900">{service.name}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {serviceData.name}
+                      </h3>
+                      <p className="text-gray-600">
+                        ₹{serviceData.price}/km
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -87,6 +151,8 @@ export default function BookNowButton({
                       {services.find(s => s.id === selectedService)?.name}
                     </span>
                   </div>
+
+                  {step === 2 && serviceData?.type === 'taxi' && renderTaxiForm()}
 
                   <form className="space-y-4">
                     <div>

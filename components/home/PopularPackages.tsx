@@ -43,13 +43,13 @@ function PackageCard({ packageItem }: { packageItem: Package }) {
       
       <CardFooter className="flex justify-between items-center border-t">
         <Link 
-          href={`/packages/${packageItem.id}`} 
+          href={`/booking?service=package&id=${packageItem.id}`} 
           className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
         >
           View Details
           <ArrowRight className="ml-1 h-4 w-4" />
         </Link>
-        <Link href={`/booking?package=${packageItem.id}`}>
+        <Link href={`/booking?service=package&id=${packageItem.id}`}>
           <Button variant="primary" size="sm">Book Now</Button>
         </Link>
       </CardFooter>

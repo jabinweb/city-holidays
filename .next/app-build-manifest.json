@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/page": [
+    "/services/taxi/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/services/taxi/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -16,30 +16,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/booking/page.js"
     ],
-    "/services/page": [
+    "/contact/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/services/page.js"
+      "static/chunks/app/contact/page.js"
     ],
     "/enquiry/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/enquiry/page.js"
     ],
-    "/contact/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/contact/page.js"
-    ],
     "/packages/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/packages/page.js"
     ],
-    "/packages/[id]/page": [
+    "/services/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/packages/[id]/page.js"
+      "static/chunks/app/services/page.js"
+    ],
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ],
     "/not-found": [
       "static/chunks/webpack.js",
