@@ -6,6 +6,7 @@ import Container from '../ui/Container';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Button from '../ui/Button';
+import BookNowButton from '../ui/BookNowButton';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,9 +94,7 @@ const Header = () => {
                 {link.name}
               </Link>
             ))}
-            <Button variant={isScrolled ? "primary" : "secondary"} size="sm">
-              Book Now
-            </Button>
+            <BookNowButton variant={isScrolled ? "primary" : "secondary"} size="sm" />
           </nav>
           
           <button
@@ -132,9 +131,7 @@ const Header = () => {
             </Link>
           ))}
           <div className="pt-4">
-            <Button variant="primary" fullWidth>
-              Book Now
-            </Button>
+            <BookNowButton variant="primary" fullWidth />
           </div>
           
           <div className="pt-6 border-t border-gray-200 space-y-2">

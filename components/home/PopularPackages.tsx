@@ -4,36 +4,7 @@ import { MapPin, Clock, ArrowRight } from 'lucide-react';
 import Container from '../ui/Container';
 import Card, { CardContent, CardImage, CardTitle, CardDescription, CardFooter } from '../ui/Card';
 import Button from '../ui/Button';
-
-interface Package {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  duration: string;
-  imageUrl: string;
-  popular?: boolean;
-}
-
-const packages: Package[] = [
-  {
-    id: '1',
-    title: 'Goa Beach Paradise',
-    description: 'Experience the perfect beach holiday with pristine shores and vibrant nightlife.',
-    price: 19999,
-    duration: '4 Days / 3 Nights',
-    imageUrl: 'https://images.pexels.com/photos/1078983/pexels-photo-1078983.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    popular: true
-  },
-  {
-    id: '2',
-    title: 'Kerala Backwaters',
-    description: `Explore the serene backwaters and lush greenery of God's own country.`,
-    price: 22999,
-    duration: '5 Days / 4 Nights',
-    imageUrl: 'https://images.pexels.com/photos/695761/pexels-photo-695761.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-  }
-];
+import { Package, packages } from '@/data/packages';
 
 function PackageCard({ packageItem }: { packageItem: Package }) {
   return (
@@ -71,11 +42,14 @@ function PackageCard({ packageItem }: { packageItem: Package }) {
       </CardContent>
       
       <CardFooter className="flex justify-between items-center border-t">
-        <Link href="/booking" className="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+        <Link 
+          href={`/packages/${packageItem.id}`} 
+          className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+        >
           View Details
           <ArrowRight className="ml-1 h-4 w-4" />
         </Link>
-        <Link href="/booking">
+        <Link href={`/booking?package=${packageItem.id}`}>
           <Button variant="primary" size="sm">Book Now</Button>
         </Link>
       </CardFooter>
@@ -84,6 +58,11 @@ function PackageCard({ packageItem }: { packageItem: Package }) {
 }
 
 export default function PopularPackages() {
+  // Show only 4 packages, prioritizing popular ones
+  const displayPackages = packages
+    .sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0))
+    .slice(0, 4);
+
   return (
     <section className="py-16">
       <Container>
@@ -97,13 +76,13 @@ export default function PopularPackages() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {packages.map((packageItem) => (
+          {displayPackages.map((packageItem) => (
             <PackageCard key={packageItem.id} packageItem={packageItem} />
           ))}
         </div>
         
         <div className="text-center mt-12">
-          <Link href="/services">
+          <Link href="/packages">
             <Button variant="outline" size="lg">
               View All Packages
               <ArrowRight className="ml-2 h-4 w-4" />

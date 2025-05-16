@@ -72,47 +72,19 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({ testimonial }
 
 const Testimonials = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [autoplay, setAutoplay] = useState(true);
-  
-  const getSlidesPerView = () => {
-    if (typeof window === 'undefined') return 3;
-    if (window.innerWidth < 640) return 1;
-    if (window.innerWidth < 1024) return 2;
-    return 3;
-  };
-
-  const [slidesPerView, setSlidesPerView] = useState(getSlidesPerView());
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setSlidesPerView(getSlidesPerView());
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    setMounted(true);
   }, []);
-  
-  const maxIndex = testimonials.length - slidesPerView;
-  
-  const prevSlide = () => {
-    setActiveIndex((prev) => Math.max(prev - 1, 0));
-    setAutoplay(false);
-  };
-  
+
   const nextSlide = () => {
-    setActiveIndex((prev) => Math.min(prev + 1, maxIndex));
-    setAutoplay(false);
+    setActiveIndex((prev) => (prev + 1) % (testimonials.length - 2));
   };
 
-  useEffect(() => {
-    if (!autoplay) return;
-    
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [autoplay, maxIndex]);
+  const prevSlide = () => {
+    setActiveIndex((prev) => (prev === 0 ? testimonials.length - 3 : prev - 1));
+  };
 
   return (
     <section className="py-16 bg-blue-50">
@@ -126,63 +98,58 @@ const Testimonials = () => {
           </p>
         </div>
         
-        <div className="relative px-4 md:px-8">
-          <button 
-            onClick={prevSlide}
-            disabled={activeIndex === 0}
-            className={`absolute -left-4 md:-left-8 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10 transition-all
-              ${activeIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 hover:scale-110'}`}
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft size={24} className="text-gray-600" />
-          </button>
-          
-          <div className="overflow-hidden">
-            <div 
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ 
-                transform: `translateX(-${(activeIndex * 100) / slidesPerView}%)`,
-                gap: '1.5rem',
-              }}
-            >
-              {testimonials.map((testimonial) => (
-                <div 
-                  key={testimonial.id}
-                  className="flex-none w-full pb-2 sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
-                >
-                  <TestimonialCard testimonial={testimonial} />
-                </div>
-              ))}
+        <div className="relative">
+          {/* Mobile scroll view */}
+          <div className="block lg:hidden -mx-4">
+            <div className="overflow-x-auto snap-x snap-mandatory hide-scrollbar px-4">
+              <div className="flex gap-6">
+                {testimonials.map((testimonial) => (
+                  <div 
+                    key={testimonial.id}
+                    className="flex-none w-[85%] snap-center"
+                  >
+                    <TestimonialCard testimonial={testimonial} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          
-          <button 
-            onClick={nextSlide}
-            disabled={activeIndex === maxIndex}
-            className={`absolute -right-4 md:-right-8 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10 transition-all
-              ${activeIndex === maxIndex ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 hover:scale-110'}`}
-            aria-label="Next testimonial"
-          >
-            <ChevronRight size={24} className="text-gray-600" />
-          </button>
-        </div>
-        
-        <div className="flex justify-center mt-8 space-x-2">
-          {[...Array(maxIndex + 1)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setActiveIndex(i);
-                setAutoplay(false);
-              }}
-              className={`w-2 h-2 rounded-full transition-all ${
-                activeIndex === i 
-                  ? 'bg-blue-600 w-4' 
-                  : 'bg-gray-300 hover:bg-blue-400'
-              }`}
-              aria-label={`Go to testimonial set ${i + 1}`}
-            />
-          ))}
+
+          {/* Desktop slider */}
+          <div className="hidden lg:block relative">
+            {mounted && (
+              <>
+                <button 
+                  onClick={prevSlide}
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10 hover:bg-gray-100 transition-colors"
+                  aria-label="Previous testimonials"
+                >
+                  <ChevronLeft size={24} className="text-gray-600" />
+                </button>
+
+                <div className="overflow-hidden mx-4">
+                  <div 
+                    className="flex gap-6 transition-transform duration-300"
+                    style={{ transform: `translateX(-${activeIndex * 33.33}%)` }}
+                  >
+                    {testimonials.map((testimonial) => (
+                      <div key={testimonial.id} className="flex-none w-1/3">
+                        <TestimonialCard testimonial={testimonial} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={nextSlide}
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-10 hover:bg-gray-100 transition-colors"
+                  aria-label="Next testimonials"
+                >
+                  <ChevronRight size={24} className="text-gray-600" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </Container>
     </section>

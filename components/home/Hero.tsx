@@ -108,7 +108,7 @@ const Hero: React.FC = () => {
       </div>
       
       {/* Fixed CTA for mobile */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-blue-950 to-blue-900/95 border-t border-white/10 md:hidden">
+      <div className="fixed bottom-0 z-20    left-0 right-0 p-4 bg-gradient-to-t from-blue-950 to-blue-900/95 border-t border-white/10 md:hidden">
         <Button variant="secondary" fullWidth size="lg">
           Make an Enquiry
         </Button>

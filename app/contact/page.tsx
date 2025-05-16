@@ -1,10 +1,57 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 
 const ContactPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone is required';
+    } else if (!/^[0-9]{10}$/.test(formData.phone.trim())) {
+      newErrors.phone = 'Please enter a valid 10-digit number';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const socialIcons = {
     facebook: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,8 +101,8 @@ const ContactPage: React.FC = () => {
                   <div>
                     <h3 className="font-semibold text-lg">Phone</h3>
                     <p className="text-gray-600 mb-1">For bookings and general enquiries:</p>
-                    <a href="tel:+911234567890" className="text-blue-600 hover:text-blue-800 font-medium">
-                      +91 1234567890
+                    <a href="tel:+919528735541" className="text-blue-600 hover:text-blue-800 font-medium">
+                      +91 9528735541
                     </a>
                   </div>
                 </div>
@@ -68,7 +115,7 @@ const ContactPage: React.FC = () => {
                     <h3 className="font-semibold text-lg">Email</h3>
                     <p className="text-gray-600 mb-1">For any written enquiries:</p>
                     <a href="mailto:info@cityholidays.com" className="text-blue-600 hover:text-blue-800 font-medium">
-                      info@cityholidays.com
+                      info@cityholidays.in
                     </a>
                   </div>
                 </div>
@@ -80,7 +127,7 @@ const ContactPage: React.FC = () => {
                   <div>
                     <h3 className="font-semibold text-lg">Office Address</h3>
                     <p className="text-gray-600">
-                      123 Travel Street, Tourist Area,<br/>
+                      Gandhi Gram Ashram Tajganj,<br/>
                       Agra, Uttar Pradesh,<br/>
                       India - 282001
                     </p>
@@ -133,7 +180,7 @@ const ContactPage: React.FC = () => {
                     {socialIcons.twitter}
                   </a>
                   <a 
-                    href="https://instagram.com" 
+                    href="https://www.instagram.com/city.holidays" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-blue-50 p-2 rounded-full text-blue-600 hover:bg-blue-100 transition-colors"
@@ -141,7 +188,7 @@ const ContactPage: React.FC = () => {
                     {socialIcons.instagram}
                   </a>
                   <a 
-                    href="https://wa.me/911234567890" 
+                    href="https://wa.me/message/5TS7E6OWUZDVK1" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-green-50 p-2 rounded-full text-green-600 hover:bg-green-100 transition-colors"
@@ -186,63 +233,47 @@ const ContactPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
               <h2 className="text-2xl font-semibold mb-6">Send a Message</h2>
               
-              <form>
-                <div className="grid grid-cols-1 gap-4 mb-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter your full name"
-                      required
-                    />
+              {submitted ? (
+                <div className="text-center py-8">
+                  <div className="mb-4 text-green-500">
+                    <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter your email address"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter your phone number"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <input
-                      id="subject"
-                      name="subject"
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="What is your message about?"
-                      required
-                    />
-                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Message Sent Successfully!</h3>
+                  <p className="text-gray-600">We'll get back to you as soon as possible.</p>
+                  <Button 
+                    variant="primary" 
+                    className="mt-6"
+                    onClick={() => setSubmitted(false)}
+                  >
+                    Send Another Message
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {['name', 'email', 'phone', 'subject'].map((field) => (
+                    <div key={field}>
+                      <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                        {field}
+                      </label>
+                      <input
+                        id={field}
+                        name={field}
+                        type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                        value={formData[field as keyof typeof formData]}
+                        onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors[field] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isLoading}
+                        required
+                      />
+                      {errors[field] && (
+                        <p className="mt-1 text-sm text-red-500">{errors[field]}</p>
+                      )}
+                    </div>
+                  ))}
                   
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
@@ -252,17 +283,33 @@ const ContactPage: React.FC = () => {
                       id="message"
                       name="message"
                       rows={4}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Your message..."
+                      disabled={isLoading}
                       required
-                    ></textarea>
+                    />
                   </div>
-                </div>
-                
-                <Button type="submit" fullWidth>
-                  Send Message
-                </Button>
-              </form>
+                  
+                  <Button 
+                    type="submit" 
+                    fullWidth 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      'Send Message'
+                    )}
+                  </Button>
+                </form>
+              )}
             </div>
             
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
