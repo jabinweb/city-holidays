@@ -2,10 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import Container from '@/components/ui/Container';
-import { Calendar, MapPin, User, CreditCard, Bell, Download, Star, Package, Clock } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
+import { 
+  Calendar, 
+  MapPin, 
+  Clock, 
+  CreditCard, 
+  User, 
+  Settings, 
+  BookOpen,
+  TrendingUp,
+  Users,
+  Package,
+  Bell,
+  Download,
+  Star
+} from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 interface Booking {
   id: string;
