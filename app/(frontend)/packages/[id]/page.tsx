@@ -20,12 +20,13 @@ import { packages } from '@/data/packages';
 export const dynamic = 'force-dynamic';
 
 interface PackagePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function PackagePage({ params }: PackagePageProps) {
+export default async function PackagePage(props: PackagePageProps) {
+  const params = await props.params;
   const packageItem = packages.find(pkg => pkg.id === params.id);
 
   if (!packageItem) {
