@@ -3,6 +3,8 @@
 import { Suspense } from 'react';
 import BookingContent from './BookingContent';
 
+export const dynamic = 'force-dynamic';
+
 function BookingPageLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
