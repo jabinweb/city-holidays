@@ -77,3 +77,7 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+
+# Next.js cache and build files
+.next
+.next/
