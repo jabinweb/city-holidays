@@ -1,7 +1,6 @@
 import React from 'react';
-import { Plane, Train, Bus, Car, Package, ArrowRight } from 'lucide-react';
+import { Plane, Train, Bus, Car, Package, ArrowRight, CheckCircle } from 'lucide-react';
 import Container from '../ui/Container';
-import Card, { CardContent, CardImage, CardTitle, CardDescription, CardFooter } from '../ui/Card';
 import Button from '../ui/Button';
 import Link from 'next/link';
 
@@ -10,122 +9,214 @@ const ServiceCard: React.FC<{
   description: string;
   icon: React.ReactNode;
   link: string;
-  imageUrl: string;
-}> = ({ title, description, icon, link, imageUrl }) => {
+  features: string[];
+  gradient: string;
+}> = ({ title, description, icon, link, features, gradient }) => {
   return (
-    <Card hoverable className="h-full">
-      <CardImage 
-        src={imageUrl} 
-        alt={title} 
-        className="h-48"
-      />
-      <CardContent>
-        <div className="flex items-center mb-2">
-          <div className="p-2 rounded-full bg-blue-50 text-blue-600 mr-3">
+    <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100">
+      {/* Gradient Background */}
+      <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+      
+      {/* Content */}
+      <div className="relative p-8">
+        {/* Icon and Title */}
+        <div className="flex items-center mb-6">
+          <div className={`p-4 rounded-xl ${gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
             {icon}
           </div>
-          <CardTitle>{title}</CardTitle>
+          <div className="ml-4">
+            <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+              {title}
+            </h3>
+          </div>
         </div>
-        <CardDescription>{description}</CardDescription>
-      </CardContent>
-      <CardFooter className="flex justify-between items-center border-t">
-        <Link href={link} className="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-          Learn More
-          <ArrowRight size={16} className="ml-1" />
+        
+        {/* Description */}
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          {description}
+        </p>
+        
+        {/* Features */}
+        <div className="space-y-2 mb-8">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center text-sm text-gray-700">
+              <CheckCircle className="h-4 w-4 text-green-500 mr-3 flex-shrink-0" />
+              <span>{feature}</span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Action Button */}
+        <Link href={link}>
+          <Button 
+            variant="outline" 
+            className="w-full group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300"
+          >
+            Learn More
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+          </Button>
         </Link>
-        <Link href="/booking">
-          <Button variant="primary" size="sm">Book Now</Button>
-        </Link>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 
 const Services: React.FC = () => {
   const services = [
     {
+      title: 'Golden Triangle Tours',
+      description: 'Expertly crafted packages covering Delhi, Agra, and Jaipur with extensions to Rajasthan\'s royal destinations.',
+      icon: <Package size={28} />,
+      link: '/packages?type=golden-triangle', // Routes to (frontend) group
+      gradient: 'bg-gradient-to-br from-amber-500 to-orange-600',
+      features: [
+        'UNESCO World Heritage Sites',
+        'Professional Local Guides',
+        'Luxury Transportation',
+        'Cultural Experiences'
+      ]
+    },
+    {
       title: 'Holiday Packages',
-      description: 'Customized holiday packages for families, couples, and solo travelers to destinations across India and abroad.',
-      icon: <Package size={24} />,
-      link: '/services',
-      imageUrl: 'https://images.pexels.com/photos/3935702/pexels-photo-3935702.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+      description: 'Comprehensive travel solutions for families, couples, and solo travelers across India and international destinations.',
+      icon: <Package size={28} />,
+      link: '/packages', // Routes to (frontend) group
+      gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600',
+      features: [
+        'Customized Itineraries',
+        'All-Inclusive Packages',
+        'Expert Travel Consultancy',
+        '24/7 Support'
+      ]
     },
     {
       title: 'Flight Bookings',
-      description: 'Domestic and international flight bookings at competitive prices with special deals and discounts.',
-      icon: <Plane size={24} />,
+      description: 'Seamless domestic and international flight reservations with competitive pricing and exclusive deals.',
+      icon: <Plane size={28} />,
       link: '/services',
-      imageUrl: 'https://images.pexels.com/photos/358319/pexels-photo-358319.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
+      gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+      features: [
+        'Best Price Guarantee',
+        'Instant Confirmation',
+        'Group Discounts',
+        'Flexible Booking Options'
+      ]
     },
     {
       title: 'Railway Reservations',
-      description: 'Hassle-free railway ticket bookings for all classes across Indian Railways network.',
-      icon: <Train size={24} />,
+      description: 'Hassle-free train ticket bookings across India\'s extensive railway network with expert assistance.',
+      icon: <Train size={28} />,
       link: '/services',
-      imageUrl: 'https://images.unsplash.com/photo-1442570468985-f63ed5de9086?q=80&w=2720&auto=format&fit=crop'
+      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
+      features: [
+        'All Class Reservations',
+        'Tatkal Booking Service',
+        'PNR Status Tracking',
+        'Concession Assistance'
+      ]
     },
     {
       title: 'Bus Bookings',
-      description: 'Book bus tickets for various operators covering routes across all major cities and tourist destinations.',
-      icon: <Bus size={24} />,
+      description: 'Comfortable intercity travel with our network of premium bus operators covering major routes.',
+      icon: <Bus size={28} />,
       link: '/services',
-      imageUrl: 'https://images.unsplash.com/photo-1525962898597-a4ae6402826e?q=80&w=2669&auto=format&fit=crop'
+      gradient: 'bg-gradient-to-br from-rose-500 to-pink-600',
+      features: [
+        'AC & Non-AC Options',
+        'Premium & Budget Fleet',
+        'Online Seat Selection',
+        'Real-time Tracking'
+      ]
     },
     {
       title: 'Taxi Services',
-      description: 'Reliable taxi services for local sightseeing, airport transfers, and outstation travel.',
-      icon: <Car size={24} />,
+      description: 'Professional chauffeur services for local sightseeing, airport transfers, and outstation journeys.',
+      icon: <Car size={28} />,
       link: '/services/taxi',
-      imageUrl: 'https://images.unsplash.com/photo-1628947733273-cdae71c9bfd3?q=80&w=2670&auto=format&fit=crop'
+      gradient: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      features: [
+        'Professional Drivers',
+        'Well-maintained Fleet',
+        'Hourly & Daily Rentals',
+        'GPS Tracking'
+      ]
     }
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
-      <Container>
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Our <span className="text-blue-600">Services</span>
+    <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full translate-x-1/2 translate-y-1/2" />
+      </div>
+      
+      <Container className="relative">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <Package className="h-4 w-4" />
+            Professional Services
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Travel&nbsp;
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Solutions 
+            </span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            We offer a comprehensive range of travel services to make your journey smooth and memorable. 
-            From planning to execution, we take care of all your travel needs.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            From planning to execution, we provide end-to-end travel services with 
+            professional expertise and personalized attention to every detail.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.slice(0, 3).map((service, index) => (
+        {/* Services Grid */}
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-16">
+          {services.map((service, index) => (
             <ServiceCard
               key={index}
               title={service.title}
               description={service.description}
               icon={service.icon}
               link={service.link}
-              imageUrl={service.imageUrl}
+              features={service.features}
+              gradient={service.gradient}
             />
           ))}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-          {services.slice(3, 5).map((service, index) => (
-            <ServiceCard
-              key={index}
-              title={service.title}
-              description={service.description}
-              icon={service.icon}
-              link={service.link}
-              imageUrl={service.imageUrl}
-            />
-          ))}
-        </div>
-        
-        <div className="text-center mt-12">
-          <Link href="/services">
-            <Button variant="outline" size="lg">
-              View All Services
-              <ArrowRight size={16} className="ml-2" />
-            </Button>
-          </Link>
+        {/* Call to Action */}
+        <div className="text-center">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto border border-gray-100">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Ready to Start Your Journey?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Our travel experts are here to help you plan the perfect trip. 
+              Get personalized recommendations and exclusive deals.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/services">
+                <Button 
+                  variant="primary" 
+                  size="lg"
+                  className="px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  Explore All Services
+                  <ArrowRight size={20} className="ml-2" />
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-all duration-300"
+                >
+                  Get Consultation
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </Container>
     </section>

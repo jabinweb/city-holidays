@@ -183,7 +183,7 @@ export default function BookNowButton({
                       <Button variant="outline" onClick={() => setStep(1)}>
                         Back
                       </Button>
-                      <Button variant="primary">
+                      <Button variant="primary" onClick={() => window.location.href = '/contact'}>
                         Submit Request
                       </Button>
                     </div>

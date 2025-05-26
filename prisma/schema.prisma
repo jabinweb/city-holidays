@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  phone         String?
+  address       String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  packageId       String?
+  serviceType     ServiceType
+  status          BookingStatus @default(PENDING)
+  travelers       Int           @default(1)
+  rooms           Int?
+  date            DateTime?
+  totalAmount     Float
+  paidAmount      Float         @default(0)
+  specialRequests String?
+  
+  // Personal Information
+  contactName     String
+  contactEmail    String
+  contactPhone    String
+  contactAddress  String?
+  
+  // Emergency Contact
+  emergencyName   String?
+  emergencyPhone  String?
+  emergencyRelation String?
+  
+  // Taxi specific fields
+  pickupLocation  String?
+  dropLocation    String?
+  pickupTime      DateTime?
+  
+  // Payment fields
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  user            User          @relation(fields: [userId], references: [id])
+}
+
+model Package {
+  id            String   @id
+  title         String
+  description   String
+  price         Float
+  duration      String
+  imageUrl      String
+  popular       Boolean  @default(false)
+  location      String
+  type          String   @default("package")
+  highlights    String?  // JSON string
+  transportation String?
+  pickupPoints  String?  // JSON string
+  itinerary     String?  // JSON string
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FormResponse {
+  id          String   @id @default(cuid())
+  type        String   // 'contact', 'inquiry', 'booking', etc.
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  message     String
+  data        String?  // JSON string for additional form data
+  status      String   @default("NEW") // NEW, READ, REPLIED, CLOSED
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  assignedTo  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ServiceType {
+  HOLIDAY_PACKAGE
+  GOLDEN_TRIANGLE
+  FLIGHT
+  RAILWAY
+  BUS
+  TAXI
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
