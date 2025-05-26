@@ -13,15 +13,16 @@ const nextConfig = {
       'www.vanrentalchennai.in'
     ]
   },
-  // Ensure Prisma is bundled correctly
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  // Ensure Prisma is bundled correctly for Vercel
+  webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals.push('@prisma/client');
+      // Don't externalize @prisma/client on server side for Vercel
+      config.externals = config.externals.filter(
+        (external) => typeof external === 'string' && !external.includes('@prisma/client')
+      );
     }
     return config;
   },
-  // Disable static optimization for API routes
-  generateStaticParams: false,
 }
 
 export default nextConfig;
