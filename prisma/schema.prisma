@@ -36,7 +36,7 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  name          String
   email         String    @unique
   emailVerified DateTime?
   image         String?
@@ -62,59 +62,41 @@ model VerificationToken {
 model Booking {
   id              String        @id @default(cuid())
   userId          String
-  packageId       String?
-  serviceType     ServiceType
-  status          BookingStatus @default(PENDING)
-  travelers       Int           @default(1)
-  rooms           Int?
-  date            DateTime?
+  packageId       String
   totalAmount     Float
   paidAmount      Float         @default(0)
+  status          BookingStatus @default(PENDING)
+  travelDate      DateTime
+  numberOfPeople  Int
   specialRequests String?
-  
-  // Personal Information
-  contactName     String
-  contactEmail    String
-  contactPhone    String
-  contactAddress  String?
-  
-  // Emergency Contact
-  emergencyName   String?
-  emergencyPhone  String?
-  emergencyRelation String?
-  
-  // Taxi specific fields
-  pickupLocation  String?
-  dropLocation    String?
-  pickupTime      DateTime?
-  
-  // Payment fields
   razorpayOrderId   String?
   razorpayPaymentId String?
   razorpaySignature String?
-  
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  
-  user            User          @relation(fields: [userId], references: [id])
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package         Package       @relation(fields: [packageId], references: [id], onDelete: Cascade)
 }
 
 model Package {
-  id            String   @id
+  id            String   @id @default(cuid())
   title         String
   description   String
   price         Float
   duration      String
-  imageUrl      String
-  popular       Boolean  @default(false)
   location      String
-  type          String   @default("package")
+  imageUrl      String
   highlights    String?  // JSON string
+  itinerary     String?  // JSON string
+  type          String?
   transportation String?
   pickupPoints  String?  // JSON string
-  itinerary     String?  // JSON string
+  popular       Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  bookings      Booking[]
 }
 
 model Setting {

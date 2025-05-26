@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       ];
     }
 
-    // Get bookings with pagination
+    // Get bookings with pagination - remove package relation for now
     const [bookings, total] = await Promise.all([
       prisma.booking.findMany({
         where,
@@ -52,14 +52,6 @@ export async function GET(request: Request) {
             select: {
               name: true,
               email: true,
-            },
-          },
-          package: {
-            select: {
-              title: true,
-              price: true,
-              duration: true,
-              location: true,
             },
           },
         },
@@ -109,14 +101,6 @@ export async function PATCH(request: Request) {
           select: {
             name: true,
             email: true,
-          },
-        },
-        package: {
-          select: {
-            title: true,
-            price: true,
-            duration: true,
-            location: true,
           },
         },
       },
