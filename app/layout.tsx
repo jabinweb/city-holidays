@@ -8,8 +8,7 @@ import { auth } from '@/auth';
 
 const inter = Inter({ 
   subsets: ['latin'],
-  display: 'swap',
-  preload: true
+  display: 'swap'
 });
 
 export const metadata: Metadata = {
