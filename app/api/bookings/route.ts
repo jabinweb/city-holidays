@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const bookingSchema = z.object({
   packageId: z.string().optional(),
@@ -29,79 +31,118 @@ export async function POST(request: Request) {
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { message: 'Unauthorized - Please sign in' },
+        { message: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    const body = await request.json();
-    const validatedData = bookingSchema.parse(body);
+    // Dynamic import to avoid build-time database connection
+    const { prisma } = await import('@/lib/prisma');
 
-    const booking = await prisma.booking.create({
-      data: {
-        userId: session.user.id,
-        packageId: validatedData.packageId,
-        serviceType: validatedData.serviceType,
-        travelers: validatedData.travelers,
-        rooms: validatedData.rooms,
-        date: validatedData.date ? new Date(validatedData.date) : null,
-        totalAmount: validatedData.totalAmount,
-        paidAmount: 0, // Initially no payment made
-        specialRequests: validatedData.specialRequests,
-        contactName: validatedData.contactName,
-        contactEmail: validatedData.contactEmail,
-        contactPhone: validatedData.contactPhone,
-        contactAddress: validatedData.contactAddress,
-        emergencyName: validatedData.emergencyName,
-        emergencyPhone: validatedData.emergencyPhone,
-        emergencyRelation: validatedData.emergencyRelation,
-        pickupLocation: validatedData.pickupLocation,
-        dropLocation: validatedData.dropLocation,
-        pickupTime: validatedData.pickupTime ? new Date(validatedData.pickupTime) : null,
-        status: 'PENDING',
-      },
-    });
-
-    return NextResponse.json(booking, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.serviceType || !data.totalAmount) {
       return NextResponse.json(
-        { message: 'Invalid input data', errors: error.errors },
+        { message: 'Missing required fields' },
         { status: 400 }
       );
     }
 
+    // Create booking data object
+    const bookingData: any = {
+      userId: session.user.id,
+      totalAmount: parseFloat(data.totalAmount),
+      paidAmount: 0,
+      status: 'PENDING',
+      numberOfPeople: data.travelers || 1,
+      travelDate: data.travelDate ? new Date(data.travelDate) : new Date(),
+      specialRequests: data.specialRequests || null,
+    };
+
+    // Only add packageId if it exists and is not undefined
+    if (data.packageId && data.packageId !== 'undefined') {
+      bookingData.packageId = data.packageId;
+    } else {
+      // For services without packageId, we'll need to handle this differently
+      // For now, let's skip packageId and it will be null in the database
+      return NextResponse.json(
+        { message: 'Package ID is required for bookings' },
+        { status: 400 }
+      );
+    }
+
+    const booking = await prisma.booking.create({
+      data: bookingData,
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        package: {
+          select: {
+            title: true,
+            duration: true,
+            location: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      booking: booking,
+      message: 'Booking created successfully'
+    });
+
+  } catch (error) {
     console.error('Booking creation error:', error);
     return NextResponse.json(
-      { message: 'Failed to create booking. Please try again.' },
+      { message: 'Failed to create booking' },
       { status: 500 }
     );
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { message: 'Unauthorized - Please sign in' },
+        { message: 'Authentication required' },
         { status: 401 }
       );
     }
 
+    // Dynamic import to avoid build-time database connection
+    const { prisma } = await import('@/lib/prisma');
+
     const bookings = await prisma.booking.findMany({
       where: {
-        userId: session.user.id,
+        userId: session.user.id
+      },
+      include: {
+        package: {
+          select: {
+            title: true,
+            duration: true,
+            location: true,
+            imageUrl: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
-      },
+        createdAt: 'desc'
+      }
     });
 
     return NextResponse.json(bookings);
+
   } catch (error) {
-    console.error('Fetch bookings error:', error);
+    console.error('Bookings fetch error:', error);
     return NextResponse.json(
       { message: 'Failed to fetch bookings' },
       { status: 500 }
