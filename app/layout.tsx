@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider } from '@/components/providers/SessionProvider';
 import { auth } from '@/auth';
 
 const inter = Inter({ 
@@ -13,45 +13,25 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: 'City Holidays - Best Travel Agency in Agra | Golden Triangle Tours',
-    template: '%s | City Holidays'
-  },
-  description: 'Professional travel services in Agra. Golden Triangle tours, hotel bookings, flight reservations, taxi services. Trusted by 10,000+ travelers. Book now!',
-  keywords: 'Agra travel agency, Golden Triangle tours, Taj Mahal tours, Delhi Agra Jaipur packages, flight booking, hotel booking, taxi service Agra',
+  title: 'City Holidays - Premium Travel Services',
+  description: 'Professional travel services including Golden Triangle tours, holiday packages, flight bookings, railway reservations, and taxi services.',
+  keywords: 'travel, tours, Golden Triangle, Agra, Delhi, Jaipur, flight booking, railway reservation, taxi service',
   authors: [{ name: 'City Holidays' }],
   creator: 'City Holidays',
   publisher: 'City Holidays',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
   metadataBase: new URL('https://cityholidays.in'),
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
-    title: 'City Holidays - Best Travel Agency in Agra',
-    description: 'Professional travel services with Golden Triangle tours, bookings, and taxi services. Trusted by 10,000+ travelers.',
+    title: 'City Holidays - Premium Travel Services',
+    description: 'Professional travel services for all your journey needs',
     url: 'https://cityholidays.in',
     siteName: 'City Holidays',
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'City Holidays - Travel Agency',
-      },
-    ],
-    locale: 'en_IN',
+    locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'City Holidays - Best Travel Agency in Agra',
-    description: 'Professional travel services with Golden Triangle tours and bookings.',
-    images: ['/twitter-image.jpg'],
+    title: 'City Holidays - Premium Travel Services',
+    description: 'Professional travel services for all your journey needs',
   },
   robots: {
     index: true,
@@ -79,16 +59,19 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1e40af" />
+        <meta name="theme-color" content="#2563eb" />
       </head>
       <body className={inter.className}>
         <SessionProvider session={session}>
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </SessionProvider>
       </body>
     </html>

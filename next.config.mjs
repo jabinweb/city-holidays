@@ -13,17 +13,7 @@ const nextConfig = {
       'www.vanrentalchennai.in'
     ]
   },
-  // Ensure proper ESM/CommonJS compatibility
-  transpilePackages: ['next-auth', '@auth/core'],
-  webpack: (config, { isServer }) => {
-    // Handle ESM modules properly
-    config.resolve.extensionAlias = {
-      '.js': ['.js', '.ts', '.tsx'],
-      '.mjs': ['.mjs', '.js'],
-    };
-    
-    return config;
-  }
-};
+  // Remove conflicting webpack config that was causing module issues
+}
 
-export default nextConfig;
+export default nextConfig
