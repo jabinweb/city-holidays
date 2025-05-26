@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Container className="pt-32 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
+      <Container className="pt-12 pb-16">
         <div className="text-center max-w-2xl mx-auto">
           {/* 404 Illustration */}
           <div className="mb-8">
@@ -38,13 +38,12 @@ export default function NotFound() {
                 Go Home
               </Button>
             </Link>
-            <button 
-              onClick={() => window.history.back()}
-              className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <ArrowLeft size={20} />
-              Go Back
-            </button>
+            <Link href="/packages">
+              <Button variant="outline" size="lg" className="flex items-center gap-2">
+                <Search size={20} />
+                Browse Packages
+              </Button>
+            </Link>
           </div>
 
           {/* Quick Links */}

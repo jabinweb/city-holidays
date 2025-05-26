@@ -13,23 +13,13 @@ const nextConfig = {
       'www.vanrentalchennai.in'
     ]
   },
-  // Webpack configuration to handle auth modules properly
+  // Ensure proper ESM/CommonJS compatibility
+  transpilePackages: ['next-auth', '@auth/core'],
   webpack: (config, { isServer }) => {
-    // Exclude problematic auth modules from external handling
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        '@auth/core': 'commonjs @auth/core',
-        'next-auth': 'commonjs next-auth'
-      });
-    }
-    
-    // Handle WebAuthn utils that cause build issues
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      'crypto': false,
-      'stream': false,
-      'util': false
+    // Handle ESM modules properly
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+      '.mjs': ['.mjs', '.js'],
     };
     
     return config;
