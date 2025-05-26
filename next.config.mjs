@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['bcryptjs']
+    serverComponentsExternalPackages: ['bcryptjs', '@prisma/client']
   },
   images: {
     remotePatterns: [
@@ -32,6 +32,9 @@ const nextConfig = {
       },
     ],
   },
+    api: {
+    externalResolver: true,
+  }
 };
 
 export default nextConfig;

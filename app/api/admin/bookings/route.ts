@@ -1,18 +1,22 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
   try {
     const session = await auth();
     
-    // Type assertion to ensure TypeScript recognizes the role property
     if (!session?.user?.id || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json(
         { message: 'Unauthorized' },
         { status: 401 }
       );
     }
+
+    // Dynamic import to avoid build-time database connection
+    const { prisma } = await import('@/lib/prisma');
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -31,9 +35,8 @@ export async function GET(request: Request) {
     
     if (search) {
       where.OR = [
-        { contactName: { contains: search, mode: 'insensitive' } },
-        { contactEmail: { contains: search, mode: 'insensitive' } },
-        { contactPhone: { contains: search } },
+        { user: { name: { contains: search, mode: 'insensitive' } } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
       ];
     }
 
@@ -49,6 +52,14 @@ export async function GET(request: Request) {
             select: {
               name: true,
               email: true,
+            },
+          },
+          package: {
+            select: {
+              title: true,
+              price: true,
+              duration: true,
+              location: true,
             },
           },
         },
@@ -78,7 +89,6 @@ export async function PATCH(request: Request) {
   try {
     const session = await auth();
     
-    // Type assertion to ensure TypeScript recognizes the role property
     if (!session?.user?.id || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json(
         { message: 'Unauthorized' },
@@ -86,11 +96,30 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Dynamic import to avoid build-time database connection
+    const { prisma } = await import('@/lib/prisma');
+
     const { bookingId, status } = await request.json();
 
     const booking = await prisma.booking.update({
       where: { id: bookingId },
       data: { status },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        package: {
+          select: {
+            title: true,
+            price: true,
+            duration: true,
+            location: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(booking);
