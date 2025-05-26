@@ -10,77 +10,51 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const location = searchParams.get('location');
-    const popular = searchParams.get('popular');
-    const mixed = searchParams.get('mixed');
-    const limit = searchParams.get('limit');
     const type = searchParams.get('type');
+    const priceRange = searchParams.get('priceRange');
 
-    // Build filter conditions
+    // Build where clause
     const where: any = {};
+    
     if (location) {
       where.location = {
         contains: location,
         mode: 'insensitive'
       };
     }
-    if (popular === 'true') {
-      where.popular = true;
-    }
+    
     if (type) {
       where.type = type;
     }
+    
+    if (priceRange) {
+      const [min, max] = priceRange.split('-').map(Number);
+      if (min && max) {
+        where.price = {
+          gte: min,
+          lte: max
+        };
+      } else if (min) {
+        where.price = { gte: min };
+      } else if (max) {
+        where.price = { lte: max };
+      }
+    }
 
-    // Build query options
-    const queryOptions: any = {
+    const packages = await prisma.package.findMany({
       where,
-      orderBy: mixed === 'true' ? [
-        { popular: 'desc' },
-        { type: 'asc' },
-        { createdAt: 'desc' }
-      ] : popular === 'true' ? [
-        { popular: 'desc' },
-        { createdAt: 'desc' }
-      ] : [
-        { createdAt: 'desc' }
-      ]
-    };
+      orderBy: { createdAt: 'desc' }
+    });
 
-    // For mixed packages, get more data to allow better selection
-    if (mixed === 'true' && limit) {
-      queryOptions.take = parseInt(limit) * 2; // Get more for better mixing
-    } else if (limit) {
-      queryOptions.take = parseInt(limit);
-    }
+    // Parse JSON fields for each package
+    const formattedPackages = packages.map(pkg => ({
+      ...pkg,
+      highlights: pkg.highlights ? JSON.parse(pkg.highlights) : null,
+      itinerary: pkg.itinerary ? JSON.parse(pkg.itinerary) : null,
+      pickupPoints: pkg.pickupPoints ? JSON.parse(pkg.pickupPoints) : null,
+    }));
 
-    let packages;
-    try {
-      packages = await prisma.package.findMany(queryOptions);
-      
-      // Transform database packages to match frontend format
-      const transformedPackages = packages.map(pkg => ({
-        id: pkg.id,
-        title: pkg.title,
-        description: pkg.description,
-        price: pkg.price,
-        duration: pkg.duration,
-        location: pkg.location,
-        imageUrl: pkg.imageUrl,
-        highlights: pkg.highlights ? JSON.parse(pkg.highlights) : [],
-        itinerary: pkg.itinerary ? JSON.parse(pkg.itinerary) : [],
-        type: pkg.type || 'package',
-        transportation: pkg.transportation,
-        pickupPoints: pkg.pickupPoints ? JSON.parse(pkg.pickupPoints) : [],
-        popular: pkg.popular,
-        createdAt: pkg.createdAt,
-        updatedAt: pkg.updatedAt
-      }));
-
-      return NextResponse.json(transformedPackages);
-    } catch (dbError) {
-      console.log('Package table not found or empty, returning empty array');
-      return NextResponse.json([]);
-    }
-
+    return NextResponse.json(formattedPackages);
   } catch (error) {
     console.error('Failed to fetch packages:', error);
     return NextResponse.json([], { status: 200 });
@@ -89,6 +63,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Dynamic imports to avoid build-time database connection
     const { auth } = await import('@/auth');
     const { prisma } = await import('@/lib/prisma');
     
@@ -101,18 +76,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const packageData = await request.json();
+    const data = await request.json();
     
+    const packageData = {
+      title: data.title,
+      description: data.description,
+      price: parseFloat(data.price),
+      duration: data.duration,
+      location: data.location,
+      imageUrl: data.imageUrl,
+      highlights: data.highlights ? JSON.stringify(data.highlights) : null,
+      itinerary: data.itinerary ? JSON.stringify(data.itinerary) : null,
+      type: data.type || 'package',
+      transportation: data.transportation,
+      pickupPoints: data.pickupPoints ? JSON.stringify(data.pickupPoints) : null,
+      popular: data.popular || false
+    };
+
     const newPackage = await prisma.package.create({
-      data: {
-        ...packageData,
-        highlights: packageData.highlights ? JSON.stringify(packageData.highlights) : null,
-        pickupPoints: packageData.pickupPoints ? JSON.stringify(packageData.pickupPoints) : null,
-        itinerary: packageData.itinerary ? JSON.stringify(packageData.itinerary) : null,
-      },
+      data: packageData
     });
 
-    return NextResponse.json(newPackage, { status: 201 });
+    return NextResponse.json(newPackage);
   } catch (error) {
     console.error('Failed to create package:', error);
     return NextResponse.json(

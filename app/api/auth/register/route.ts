@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
 
-const registerSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  password: z.string().min(6),
-});
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
+    // Dynamic imports to avoid build-time database connection
+    const { prisma } = await import('@/lib/prisma');
+    const bcrypt = await import('bcryptjs');
+    const { z } = await import('zod');
+
+    const registerSchema = z.object({
+      name: z.string().min(2, 'Name must be at least 2 characters'),
+      email: z.string().email('Invalid email address'),
+      password: z.string().min(6, 'Password must be at least 6 characters'),
+      phone: z.string().optional(),
+    });
+
     const body = await request.json();
-    const { name, email, phone, password } = registerSchema.parse(body);
+    const { name, email, password, phone } = registerSchema.parse(body);
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -22,7 +27,7 @@ export async function POST(request: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { message: 'User with this email already exists' },
+        { message: 'User already exists with this email' },
         { status: 400 }
       );
     }
@@ -35,20 +40,27 @@ export async function POST(request: Request) {
       data: {
         name,
         email,
-        phone,
         password: hashedPassword,
+        phone: phone || null,
+        role: 'USER'
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true
+      }
     });
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
-
     return NextResponse.json(
-      { message: 'User created successfully', user: userWithoutPassword },
+      { message: 'User created successfully', user },
       { status: 201 }
     );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    
+    if (error.name === 'ZodError') {
       return NextResponse.json(
         { message: 'Invalid input data', errors: error.errors },
         { status: 400 }
