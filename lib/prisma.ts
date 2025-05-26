@@ -6,6 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+  errorFormat: 'pretty',
 });
 
 if (process.env.NODE_ENV !== 'production') {
@@ -13,8 +14,16 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Graceful shutdown
-if (process.env.NODE_ENV === 'production') {
-  process.on('beforeExit', async () => {
-    await prisma.$disconnect();
-  });
-}
+process.on('beforeExit', async () => {
+  await prisma.$disconnect();
+});
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});

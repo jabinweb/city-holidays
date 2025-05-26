@@ -24,4 +24,4 @@ const nextConfig = {
   generateStaticParams: false,
 }
 
-export default nextConfig;
+module.exports = nextConfig;
