@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true
-});
 
 export const metadata: Metadata = {
   title: {
