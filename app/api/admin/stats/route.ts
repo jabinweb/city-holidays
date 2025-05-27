@@ -15,59 +15,45 @@ export async function GET() {
       );
     }
 
-    // Get current date for calculations
-    const now = new Date();
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-
     // Get basic stats with proper null handling
-    const [
-      totalBookings, 
-      totalUsers, 
-      currentMonthRevenue, 
-      lastMonthRevenue,
-      bookingsByStatus,
-      recentBookings
-    ] = await Promise.all([
+    const [totalBookings, totalUsers, totalRevenue, previousMonthRevenue] = await Promise.all([
       prisma.booking.count(),
       prisma.user.count(),
       prisma.booking.aggregate({
-        _sum: { paidAmount: true },
-        where: { createdAt: { gte: currentMonth } },
-      }),
-      prisma.booking.aggregate({
-        _sum: { paidAmount: true },
-        where: { 
-          createdAt: { 
-            gte: lastMonth,
-            lt: currentMonth 
-          } 
+        _sum: {
+          paidAmount: true,
         },
       }),
-      prisma.booking.groupBy({
-        by: ['status'],
-        _count: { status: true },
-      }),
-      prisma.booking.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: { name: true, email: true },
+      // Get previous month revenue for growth calculation
+      prisma.booking.aggregate({
+        _sum: {
+          paidAmount: true,
+        },
+        where: {
+          createdAt: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+            lt: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
           },
         },
       }),
     ]);
 
     // Calculate revenue with null safety
-    const currentRevenue = currentMonthRevenue._sum.paidAmount || 0;
-    const previousRevenue = lastMonthRevenue._sum.paidAmount || 0;
+    const currentRevenue = totalRevenue._sum.paidAmount || 0;
+    const lastMonthRevenue = previousMonthRevenue._sum.paidAmount || 0;
     
     // Calculate growth percentage safely
-    const revenueGrowth = previousRevenue > 0 
-      ? ((currentRevenue - previousRevenue) / previousRevenue) * 100
+    const revenueGrowth = lastMonthRevenue > 0 
+      ? ((currentRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
       : currentRevenue > 0 ? 100 : 0;
+
+    // Get bookings by status
+    const bookingsByStatus = await prisma.booking.groupBy({
+      by: ['status'],
+      _count: {
+        status: true,
+      },
+    });
 
     // Transform bookings by status into an object with proper mapping
     const statusCounts = {
@@ -79,6 +65,7 @@ export async function GET() {
 
     bookingsByStatus.forEach((item) => {
       const status = item.status.toLowerCase();
+      // Map database status values to our expected keys
       switch (status) {
         case 'pending':
           statusCounts.pending = item._count.status;
@@ -93,28 +80,41 @@ export async function GET() {
           statusCounts.cancelled = item._count.status;
           break;
         default:
+          // Handle any other status as pending
           statusCounts.pending += item._count.status;
       }
     });
 
+    // Get recent bookings
+    const recentBookings = await prisma.booking.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
     // Calculate additional metrics
     const averageBookingValue = totalBookings > 0 ? currentRevenue / totalBookings : 0;
-    const monthlyGrowth = Math.round(revenueGrowth * 100) / 100;
 
     return NextResponse.json({
       totalBookings: totalBookings || 0,
       totalUsers: totalUsers || 0,
       totalRevenue: currentRevenue,
-      revenueGrowth: monthlyGrowth,
-      monthlyGrowth: monthlyGrowth,
+      revenueGrowth: Math.round(revenueGrowth * 100) / 100, // Round to 2 decimal places
       averageBookingValue: Math.round(averageBookingValue * 100) / 100,
       bookingsByStatus: statusCounts,
-      recentBookings: recentBookings || [],
+      recentBookings,
     });
   } catch (error) {
-    console.error('Admin dashboard error:', error);
+    console.error('Admin stats error:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch dashboard stats' },
+      { message: 'Failed to fetch admin stats' },
       { status: 500 }
     );
   }

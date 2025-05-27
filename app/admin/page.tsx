@@ -15,33 +15,37 @@ import {
   XCircle
 } from 'lucide-react';
 
-interface DashboardStats {
+interface AdminStats {
   totalBookings: number;
   totalUsers: number;
   totalRevenue: number;
+  revenueGrowth: number;
   monthlyGrowth: number;
-  recentBookings: any[];
+  averageBookingValue: number;
   bookingsByStatus: {
     pending: number;
     confirmed: number;
-    cancelled: number;
     completed: number;
+    cancelled: number;
   };
+  recentBookings: any[];
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats, setStats] = useState<AdminStats>({
     totalBookings: 0,
     totalUsers: 0,
     totalRevenue: 0,
+    revenueGrowth: 0,
     monthlyGrowth: 0,
-    recentBookings: [],
+    averageBookingValue: 0,
     bookingsByStatus: {
       pending: 0,
       confirmed: 0,
+      completed: 0,
       cancelled: 0,
-      completed: 0
-    }
+    },
+    recentBookings: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +58,10 @@ export default function AdminDashboard() {
       const response = await fetch('/api/admin/dashboard');
       if (response.ok) {
         const data = await response.json();
+        console.log('Dashboard data:', data); // Debug log
         setStats(data);
+      } else {
+        console.error('Failed to fetch dashboard stats - Status:', response.status);
       }
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error);
@@ -66,7 +73,7 @@ export default function AdminDashboard() {
   const statCards = [
     {
       title: 'Total Bookings',
-      value: stats.totalBookings,
+      value: stats?.totalBookings || 0,
       icon: Calendar,
       color: 'bg-blue-500',
       change: '+12%',
@@ -74,7 +81,7 @@ export default function AdminDashboard() {
     },
     {
       title: 'Total Users',
-      value: stats.totalUsers,
+      value: stats?.totalUsers || 0,
       icon: Users,
       color: 'bg-green-500',
       change: '+5%',
@@ -82,19 +89,25 @@ export default function AdminDashboard() {
     },
     {
       title: 'Revenue',
-      value: `₹${(stats.totalRevenue / 1000).toFixed(0)}K`,
+      value: stats?.totalRevenue ? 
+        stats.totalRevenue >= 100000 
+          ? `₹${(stats.totalRevenue / 100000).toFixed(1)}L`
+          : stats.totalRevenue >= 1000
+            ? `₹${(stats.totalRevenue / 1000).toFixed(0)}K`
+            : `₹${stats.totalRevenue.toLocaleString('en-IN')}`
+        : '₹0',
       icon: DollarSign,
       color: 'bg-purple-500',
-      change: '+8%',
-      positive: true
+      change: stats?.revenueGrowth !== undefined ? `${stats.revenueGrowth >= 0 ? '+' : ''}${stats.revenueGrowth.toFixed(1)}%` : '+0%',
+      positive: (stats?.revenueGrowth || 0) >= 0
     },
     {
       title: 'Growth',
-      value: `${stats.monthlyGrowth}%`,
+      value: stats?.monthlyGrowth !== undefined ? `${stats.monthlyGrowth.toFixed(1)}%` : '0%',
       icon: TrendingUp,
       color: 'bg-orange-500',
-      change: '+2%',
-      positive: true
+      change: stats?.monthlyGrowth !== undefined ? `${stats.monthlyGrowth >= 0 ? '+' : ''}${stats.monthlyGrowth.toFixed(1)}%` : '+0%',
+      positive: (stats?.monthlyGrowth || 0) >= 0
     }
   ];
 
@@ -228,31 +241,39 @@ export default function AdminDashboard() {
               <div className="space-y-3 lg:space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <Clock className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
                     <span className="text-sm font-medium text-gray-700">Pending</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">{stats.bookingsByStatus.pending}</span>
+                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">
+                    {stats?.bookingsByStatus?.pending || 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
                     <span className="text-sm font-medium text-gray-700">Confirmed</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">{stats.bookingsByStatus.confirmed}</span>
+                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">
+                    {stats?.bookingsByStatus?.confirmed || 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <CheckCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                     <span className="text-sm font-medium text-gray-700">Completed</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">{stats.bookingsByStatus.completed}</span>
+                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">
+                    {stats?.bookingsByStatus?.completed || 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <XCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0"></div>
                     <span className="text-sm font-medium text-gray-700">Cancelled</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">{stats.bookingsByStatus.cancelled}</span>
+                  <span className="text-sm font-bold text-gray-900 flex-shrink-0">
+                    {stats?.bookingsByStatus?.cancelled || 0}
+                  </span>
                 </div>
               </div>
             </div>
