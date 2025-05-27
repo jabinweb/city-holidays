@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { SessionProvider } from '@/components/providers/SessionProvider';
+import { SessionProvider } from 'next-auth/react';
 import { auth } from '@/auth';
 
 const inter = Inter({ 
@@ -86,13 +86,9 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <SessionProvider session={session}>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          <main className="min-h-screen">
+            {children}
+          </main>
         </SessionProvider>
       </body>
     </html>
