@@ -31,8 +31,15 @@ const nextConfig = {
       }
     ]
   },
-  // Ensure proper build output
-  output: 'standalone'
+  // Remove standalone output as it may cause issues with route groups
+  rewrites: async () => {
+    return [
+      {
+        source: '/',
+        destination: '/(frontend)',
+      }
+    ];
+  }
 }
 
 export default nextConfig
