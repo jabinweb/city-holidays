@@ -68,8 +68,17 @@ const Header = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: '/' });
+  const handleSignOut = async () => {
+    try {
+      await signOut({ 
+        callbackUrl: '/',
+        redirect: true 
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Fallback: redirect manually if signOut fails
+      window.location.href = '/';
+    }
   };
 
   const isAdmin = session?.user?.role === 'ADMIN';
@@ -272,7 +281,7 @@ const Header = () => {
               </div>
             )}
             
-            <BookNowButton variant={isScrolled ? "primary" : "secondary"} size="sm" />
+            {/* <BookNowButton variant={isScrolled ? "primary" : "secondary"} size="sm" /> */}
           </nav>
           
           {/* Mobile Menu Button */}
@@ -415,7 +424,7 @@ const Header = () => {
               </>
             )}
             
-            <BookNowButton variant="primary" fullWidth />
+            {/* <BookNowButton variant="primary" fullWidth /> */}
           </div>
         </div>
       </div>

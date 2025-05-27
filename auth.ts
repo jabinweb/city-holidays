@@ -66,6 +66,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/auth/signin",
+    signOut: "/auth/signout",
+    error: "/auth/error",
+  },
+  events: {
+    async signOut(message) {
+      console.log('User signed out:', message);
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 })

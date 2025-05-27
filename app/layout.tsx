@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { SessionProvider } from 'next-auth/react';
+import Providers from './providers';
 import { auth } from '@/auth';
 
 const inter = Inter({ 
@@ -85,11 +83,13 @@ export default async function RootLayout({
         <meta name="theme-color" content="#1e40af" />
       </head>
       <body className={inter.className}>
-        <SessionProvider session={session}>
-          <main className="min-h-screen">
-            {children}
-          </main>
-        </SessionProvider>
+        <Providers session={session}>
+          <div className="min-h-screen flex flex-col">
+            <main className="flex-1">
+              {children}
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );

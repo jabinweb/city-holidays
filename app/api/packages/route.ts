@@ -1,63 +1,90 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+
+console.log('API route loaded - packages route.ts');
 
 export async function GET(request: Request) {
+  console.log('GET /api/packages called');
+  console.log('Request URL:', request.url);
+  
   try {
-    // Dynamic import to avoid build-time database connection
-    const { prisma } = await import('@/lib/prisma');
-
+    // First try to use static data as fallback
+    const { packages } = await import('@/data/packages');
+    console.log('Using static packages data:', packages.length);
+    
     const { searchParams } = new URL(request.url);
-    const location = searchParams.get('location');
+    const limit = searchParams.get('limit');
     const type = searchParams.get('type');
-    const priceRange = searchParams.get('priceRange');
+    const destination = searchParams.get('destination');
 
-    // Build where clause
-    const where: any = {};
-    
-    if (location) {
-      where.location = {
-        contains: location,
-        mode: 'insensitive'
-      };
-    }
-    
+    console.log('Search params:', { limit, type, destination });
+
+    let filteredPackages = [...packages];
+
+    // Apply filters
     if (type) {
-      where.type = type;
-    }
-    
-    if (priceRange) {
-      const [min, max] = priceRange.split('-').map(Number);
-      if (min && max) {
-        where.price = {
-          gte: min,
-          lte: max
-        };
-      } else if (min) {
-        where.price = { gte: min };
-      } else if (max) {
-        where.price = { lte: max };
+      console.log('Filtering by type:', type);
+      if (type === 'golden-triangle') {
+        filteredPackages = filteredPackages.filter(pkg => 
+          pkg.location.includes('Delhi') && 
+          pkg.location.includes('Agra') && 
+          pkg.location.includes('Jaipur')
+        );
+      } else {
+        filteredPackages = filteredPackages.filter(pkg => pkg.type === type);
       }
+      console.log('After type filter:', filteredPackages.length);
     }
 
-    const packages = await prisma.package.findMany({
-      where,
-      orderBy: { createdAt: 'desc' }
+    if (destination) {
+      console.log('Filtering by destination:', destination);
+      filteredPackages = filteredPackages.filter(pkg => 
+        pkg.location.toLowerCase().includes(destination.toLowerCase())
+      );
+      console.log('After destination filter:', filteredPackages.length);
+    }
+
+    // Apply limit
+    if (limit) {
+      const limitNum = parseInt(limit);
+      console.log('Applying limit:', limitNum);
+      if (!isNaN(limitNum) && limitNum > 0) {
+        filteredPackages = filteredPackages.slice(0, limitNum);
+      }
+      console.log('After limit:', filteredPackages.length);
+    }
+
+    console.log('Returning packages:', filteredPackages.length);
+
+    const response = new NextResponse(JSON.stringify(filteredPackages), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
     });
 
-    // Parse JSON fields for each package
-    const formattedPackages = packages.map(pkg => ({
-      ...pkg,
-      highlights: pkg.highlights ? JSON.parse(pkg.highlights) : null,
-      itinerary: pkg.itinerary ? JSON.parse(pkg.itinerary) : null,
-      pickupPoints: pkg.pickupPoints ? JSON.parse(pkg.pickupPoints) : null,
-    }));
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    return response;
 
-    return NextResponse.json(formattedPackages);
   } catch (error) {
-    console.error('Failed to fetch packages:', error);
-    return NextResponse.json([], { status: 200 });
+    console.error('Packages API error:', error);
+    
+    return new NextResponse(JSON.stringify({
+      error: 'Failed to fetch packages',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      packages: []
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 }
 

@@ -7,9 +7,6 @@ import Container from '@/components/ui/Container';
 import PackageCard from '@/components/packages/PackageCard';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-
-
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,31 +28,87 @@ export default function PackagesPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/packages', {
+      const apiUrl = '/api/packages';
+      console.log('Fetching from URL:', apiUrl);
+      console.log('Current pathname:', window.location.pathname);
+      
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        cache: 'no-store',
+        credentials: 'omit' // Don't send authentication cookies
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          setPackages(data);
-        } else {
-          // Fallback to static data if no packages in database
-          console.log('No packages found in database, using fallback data');
-          setPackages(fallbackPackages);
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      // Check if we're being redirected to auth page
+      if (response.url.includes('/auth/signin')) {
+        console.error('API route is being redirected to sign-in page');
+        throw new Error('API authentication error - route is protected');
+      }
+      
+      // Check response status first
+      if (!response.ok) {
+        console.error('Response not OK:', response.status, response.statusText);
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      console.log('Content-Type header:', contentType);
+      
+      if (!contentType?.includes('application/json')) {
+        console.error('Invalid content type received:', contentType);
+        // Log the response body for debugging
+        const text = await response.text();
+        console.error('Response body sample:', text.substring(0, 200));
+        throw new Error('Invalid response format - expected JSON');
+      }
+      
+      const data = await response.json();
+      console.log('API data received successfully, count:', data.length);
+      
+      // Handle API error responses
+      if (data.error) {
+        console.error('API returned error:', data.error);
+        throw new Error(data.error);
+      }
+      
+      if (data && Array.isArray(data)) {
+        console.log('Setting packages:', data.length);
+        setPackages(data);
+        if (data.length === 0) {
+          setError('No packages available at the moment');
         }
       } else {
-        console.error('Failed to fetch packages, using fallback data');
-        setPackages(fallbackPackages);
+        console.error('Invalid data format:', typeof data, data);
+        throw new Error('Invalid data format received from server');
       }
+      
     } catch (error) {
       console.error('Error fetching packages:', error);
-      setError('Failed to load packages');
-      // Use fallback data on error
-      setPackages(fallbackPackages);
+      
+      // More specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else if (error instanceof Error) {
+        if (error.message.includes('authentication error')) {
+          setError('Service configuration error. Please contact support.');
+        } else if (error.message.includes('Server returned')) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError(error.message || 'Unable to load packages. Please try again later.');
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+      
+      setPackages([]);
     } finally {
       setLoading(false);
     }
@@ -115,6 +168,41 @@ export default function PackagesPage() {
     );
   }
 
+  // Handle error state
+  if (error && packages.length === 0) {
+    return (
+      <>
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white pt-32 pb-20">
+          <Container>
+            <div className="max-w-3xl">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">Tour Packages & Day Trips</h1>
+              <p className="text-xl text-blue-100">
+                Explore our carefully curated collection of travel packages, overnight tours, and same-day trips across India.
+              </p>
+            </div>
+          </Container>
+        </div>
+        <Container className="py-12">
+          <div className="text-center py-16">
+            <div className="text-red-400 mb-4">
+              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-gray-900 mb-2">{error}</h3>
+            <p className="text-gray-600 mb-6">We're experiencing technical difficulties. Please try again in a few moments.</p>
+            <button
+              onClick={fetchPackages}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </Container>
+      </>
+    );
+  }
+
   return (
     <>
       {/* Hero Section */}
@@ -125,9 +213,9 @@ export default function PackagesPage() {
             <p className="text-xl text-blue-100">
               Explore our carefully curated collection of travel packages, overnight tours, and same-day trips across India.
             </p>
-            {error && (
+            {error && packages.length > 0 && (
               <div className="mt-4 bg-yellow-500/20 border border-yellow-500/50 text-yellow-100 px-4 py-2 rounded-lg text-sm">
-                Using offline data. Some features may be limited.
+                Some packages may not be available due to technical issues.
               </div>
             )}
           </div>
@@ -280,7 +368,7 @@ export default function PackagesPage() {
             <div className="mb-4">
               <p className="text-sm text-gray-600">
                 Showing {filteredPackages.length} of {packages.length} packages
-                {error && <span className="text-yellow-600"> (offline mode)</span>}
+                {error && packages.length > 0 && <span className="text-yellow-600"> (some packages unavailable)</span>}
               </p>
             </div>
 
@@ -293,7 +381,7 @@ export default function PackagesPage() {
               ))}
             </div>
 
-            {filteredPackages.length === 0 && (
+            {filteredPackages.length === 0 && packages.length > 0 && (
               <div className="text-center py-12 lg:py-16">
                 <div className="text-gray-400 mb-4">
                   <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

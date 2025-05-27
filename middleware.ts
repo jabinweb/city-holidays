@@ -5,12 +5,22 @@ export default auth((req) => {
   const { nextUrl } = req
   const isLoggedIn = !!req.auth
 
+  // Skip middleware for static files and API routes that should be public
+  if (
+    nextUrl.pathname.startsWith('/_next') ||
+    nextUrl.pathname.startsWith('/api/packages') ||
+    nextUrl.pathname.startsWith('/api/auth') ||
+    nextUrl.pathname.includes('.') ||
+    nextUrl.pathname === '/favicon.ico'
+  ) {
+    return NextResponse.next()
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
     '/',
     '/services',
     '/packages',
-    '/packages/[id]',
     '/contact',
     '/enquiry',
     '/services/taxi',
@@ -18,24 +28,9 @@ export default auth((req) => {
     '/auth/signup'
   ]
 
-  // API routes that don't require authentication
-  const publicApiRoutes = [
-    '/api/auth/register'
-  ]
-
-  // Admin routes that require admin role
-  const adminRoutes = [
-    '/admin'
-  ]
-
   // Check if the current path is public
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname) ||
-    nextUrl.pathname.startsWith('/packages/') ||
-    publicApiRoutes.includes(nextUrl.pathname) ||
-    nextUrl.pathname.startsWith('/api/auth/')
-
-  // Check if the current path is admin
-  const isAdminRoute = nextUrl.pathname.startsWith('/admin')
+    nextUrl.pathname.startsWith('/packages/')
 
   // If user is not logged in and trying to access protected route
   if (!isLoggedIn && !isPublicRoute) {
@@ -47,13 +42,6 @@ export default auth((req) => {
   // If user is logged in and trying to access auth pages, redirect to dashboard
   if (isLoggedIn && (nextUrl.pathname.startsWith('/auth/'))) {
     return NextResponse.redirect(new URL('/dashboard', nextUrl.origin))
-  }
-
-  // Check admin access for admin routes
-  if (isAdminRoute && isLoggedIn) {
-    if (req.auth?.user?.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/dashboard', nextUrl.origin))
-    }
   }
 
   // Admin routes protection
@@ -79,10 +67,14 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    // Match all request paths except static files and images
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    '/admin/:path*',
-    '/dashboard/:path*',
-    '/bookings/:path*'
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/packages (public API)
+     * - api/auth (auth API)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api/packages|api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ]
 }

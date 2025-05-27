@@ -119,7 +119,7 @@ const FeaturedPackages: React.FC = () => {
                 <Button 
                   variant="secondary" 
                   size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg px-8 py-4 rounded-full font-semibold"
+                  className="px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   View All Packages
                   <ArrowRight size={20} className="ml-2" />
@@ -129,7 +129,7 @@ const FeaturedPackages: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="border-white text-white hover:bg-white/10 px-8 py-4 rounded-full font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-full font-semibold transition-all duration-300"
                 >
                   Custom Package
                 </Button>
