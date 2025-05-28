@@ -128,19 +128,19 @@ const Footer: React.FC = () => {
       {/* Newsletter Section */}
       <div className="border-t border-gray-800">
         <Container>
-          <div className="py-8">
-            <div className="text-center max-w-md mx-auto">
+          <div className="py-8 px-4">
+            <div className="text-center max-w-lg mx-auto">
               <h3 className="font-semibold text-lg mb-2 text-white">Stay Updated</h3>
-              <p className="text-gray-300 mb-4 text-sm">
+              <p className="text-gray-300 mb-6 text-sm leading-relaxed px-2">
                 Get the latest travel deals and destination updates
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full"
                 />
-                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors">
+                <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors text-sm whitespace-nowrap sm:w-auto w-full">
                   Subscribe
                 </button>
               </div>
